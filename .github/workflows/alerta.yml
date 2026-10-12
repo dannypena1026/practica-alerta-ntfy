@@ -1,0 +1,36 @@
+name: Hola Mundo y alerta a ntfy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  hola-y-notificacion:
+    name: Ejecutar Hola Mundo y notificar
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Descargar codigo
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Ejecutar Hola Mundo
+        run: node hola.js
+
+      - name: Enviar notificacion a ntfy.sh
+        env:
+          NTFY_URL: https://ntfy.sh/devops-itla
+        run: |
+          curl --fail --silent --show-error --retry 3 \
+            -H 'Title: DevOps ITLA - Nuevo push en main' \
+            -H 'Tags: bell,computer' \
+            -H 'Priority: 3' \
+            --data-binary "Hola Mundo ejecutado. Repositorio: ${GITHUB_REPOSITORY}. Autor: ${GITHUB_ACTOR}. Commit: ${GITHUB_SHA}." \
+            "$NTFY_URL"
